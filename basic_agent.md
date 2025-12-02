@@ -1,7 +1,7 @@
 # A Quoting Sales Agent in WayFlow with Oracle DB 26ai as vector store
 
 <div align="center">
-<img align="center" src="https://github.com/corradodebari/wayflow_samples/blob/main/images/cover.png" width="600px">
+<img align="center" src="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/images/cover.png" width="600px">
 </div>
 
 ## 1. High-level overview
@@ -18,7 +18,7 @@ This script builds a **quoting assistant** that:
 
 <br><br>
 <div align="center">
-<img src="https://github.com/corradodebari/wayflow_samples/blob/main/images/basic_agent.png" width="800px">
+<img src="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/images/basic_agent.png" width="800px">
 </div>
 
 **Takeaways:**
