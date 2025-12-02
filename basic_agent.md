@@ -1,4 +1,4 @@
-# Quoting Sales Agent in WayFlow with Oracle DB 26ai as vector store
+# A Quoting Sales Agent in WayFlow with Oracle DB 26ai as vector store
 
 <div align="center">
 <img align="center" src="images/cover.png" width="600px">
