@@ -24,8 +24,8 @@ This script builds a **quoting assistant** that:
 **Takeaways:**
 - **WayFlow 25.4.1:** full documentation: **[here](https://oracle.github.io/wayflow/25.4.1/core/api/agentspec.html)**
 - **Oracle AI Vector Search** User's Guide : **[here](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/)**
-- **Python** script: **<a href="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/quoting_sales_agent.py">quoting_sales_agent</a>**
-- **Drawio** flow: **<a href="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/Project.drawio">project</a>**
+- **Python** script: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/quoting_sales_agent.py</a>**
+- **Drawio** flow: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/Project.drawio">project</a>**
 
 
 ## 2. Setup 
