@@ -4,7 +4,7 @@
 # python env:
 # python3.11 -m venv .venv --copies
 # source .venv/bin/activate
-# pip install "wayflowcore==25.4.1" oracleb
+# pip install "wayflowcore==25.4.1" oracledb
 #
 # ollama model:
 # ollama pull nomic-embed-text
