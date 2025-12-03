@@ -44,7 +44,7 @@ They are not WayFlow-specific but define the infrastructure that the WayFlow com
 # python env:
 # python3.11 -m venv .venv --copies
 # source .venv/bin/activate
-# pip install "wayflowcore==25.4.1" oracledb oci
+# pip install "wayflowcore==25.4.1" oracledb oci "anyio==4.11.0"
 #
 # ollama model:
 # ollama pull nomic-embed-text

@@ -4,7 +4,8 @@
 # python env:
 # python3.11 -m venv .venv --copies
 # source .venv/bin/activate
-# pip install "wayflowcore==25.4.1" oracledb oci
+# pip install "wayflowcore==25.4.1" oracledb oci "anyio==4.11.0"
+
 #
 # ollama model:
 # ollama pull nomic-embed-text
@@ -67,7 +68,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DB_CFG = {
     "dsn": "localhost:1521/FREEPDB1",
     "user": "SH",
-    "password": "********", #put [SCHEMA_PASSWORD]
+    "password": "**********", #put [SCHEMA_PASSWORD]
 }
 
 PRODUCTS_TABLE = "PRODUCTS"
@@ -309,7 +310,7 @@ Tot_Price: 89.98
 Total_Order: 239.93
 """
 
-sales_agent = Agent(
+writing_agent = Agent(
     llm=llm,
     tools=[get_item_prices, get_product_by_description],
     custom_instruction=sales_instructions,
@@ -318,7 +319,7 @@ sales_agent = Agent(
 
 agent_step = AgentExecutionStep(
     name="agent_step",
-    agent=sales_agent,
+    agent=writing_agent,
     caller_input_mode=CallerInputMode.NEVER,
     output_descriptors=[output],
 )
