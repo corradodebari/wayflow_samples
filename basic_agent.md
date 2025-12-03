@@ -147,7 +147,8 @@ llm = OpenAIModel(
 
 embedding_model = OllamaEmbeddingModel(
     base_url="http://localhost:11434",
-    model_id="nomic-embed-text",
+   #model_id="nomic-embed-text",
+    model_id="mxbai-embed-large",
 )
 ```
 
@@ -158,7 +159,7 @@ embedding_model = OllamaEmbeddingModel(
     - `EMBEDDINGS` will be a VECTOR column containing sentence embeddings of PROD_DESC.
 - `LLM_CONFIG = LlmGenerationConfig(temperature=0.2)` sets the generation configuration (low temperature for more deterministic quotes).
 - `llm`: The code chooses `OpenAIModel` as the LLM implementation, but the commented-out OllamaModel shows that you can easily swap to a self-hosted LLM while keeping the agent/flow logic identical.
-- `embedding_model`: configured as an OllamaEmbeddingModel with base URL http://localhost:11434 and model `nomic-embed-text`.
+- `embedding_model`: configured as an OllamaEmbeddingModel with base URL http://localhost:11434 and model `mxbai-embed-large`.
 
 
 ## 5. Database helper functions
@@ -312,7 +313,7 @@ This tool performs a **Similarity Search** on the Oracle DB. It will help the LL
 	- Converts query into an embedding, q_vector.
 	- Runs a similarity search against PRODUCTS.EMBEDDINGS using VECTOR_DISTANCE(..., COSINE) and selects the top-k (here k = 4).
 	- Collects the results into a list of dicts.
-	- Returns a human-readable string containing the best product’s PROD_ID and PROD_NAME.
+	- Returns a human-readable string containing the list of top 4 best products with PROD_ID, PROD_NAME and PRODUCT_DESCRIPTION.
 - Note that the return type is a single str, which becomes the tool’s output descriptor via type inference. This aligns with the tool helper’s behavior: return types must be annotated so the tool schema can be inferred.
 
 ```python
@@ -322,8 +323,9 @@ This tool performs a **Similarity Search** on the Oracle DB. It will help the LL
 
 @tool(description_mode=DescriptionMode.ONLY_DOCSTRING)
 def get_product_by_description(query: str) -> str:
-    """Looks for a product from a description and return the product_id."""
+    """Looks for a list of products similar a description and return a list of product_id and prod_name."""
     logger.info("TOOL:get_product_by_description called")
+    logger.info(f"query:{query}")
 
     q_vector = embed_text_to_vector(query)
     k = 4
@@ -352,8 +354,14 @@ def get_product_by_description(query: str) -> str:
         return "No matching product found."
 
     best = rows[0]
-    logger.info(f"TOOL:get_product_by_description\n {best}")
-    return f"PROD_ID: {best['PROD_ID']} - PRODUCT_NAME: {best['PROD_NAME']}"
+    
+    response = ""
+    for row in rows:
+        response+=f"#PROD_ID: {row['PROD_ID']} - PRODUCT_NAME: {row['PROD_NAME']} - PRODUCT_DESCRIPTION: {row['PROD_DESC']}\n"
+    
+    logger.info(f"TOOL:get_product_by_description\nProduct list found:\n{response}")
+
+    return response
 ```
 
 ### 7.2 get_item_prices
@@ -423,11 +431,11 @@ sales_instructions = """
 You are a sales agent. Your task is to prepare a quote for a list of products the customer has requested. 
 
 Follow these steps:
-1. Find in the request the list of product items.
+1. In the request extract the list of product items.
 2. For each product you find, extract the requested quantity.
-3. Use the tool get_product_by_description to find the prod_id for each product item.
+3. For each product use the tool get_product_by_description to find the prod_id of the most similar product returned
 4. Use the tool get_item_prices to find the unit price given the prod_id.
-5. For each product, calculate the total price as: unit price × quantity.
+5. For each product, calculate the total price as: unit price x quantity.
 6. Prepare the quote strictly in this format:
 
 List of products:
@@ -495,7 +503,7 @@ AgentExecutionStep is a Flow step that executes an Agent. If output_descriptors 
 ```python
 agent_step = AgentExecutionStep(
     name="agent_step",
-    agent=writing_agent,
+    agent=sales_agent,
     caller_input_mode=CallerInputMode.NEVER,
     output_descriptors=[output],
 )
@@ -642,7 +650,7 @@ This is an example of execution with the provided user message:
 `I want to buy two New Zealand Cricket t-shirt, and 3 Helmets`
 
 ```bash
-(.venv) cdebari@cdebari-mac mydemo % python3.11 quoting_sales_agent.py
+(.venv) cdebari@cdebari-mac wayflow_samples % python3.11 quoting_sales_agent.py
 wayflowcore.flow - INFO - No StartStep was given as part of the Flow, one will be added automatically.
 __main__ - INFO - Column EMBEDDINGS exists — dropping it...
 __main__ - INFO - Column EMBEDDINGS successfully dropped from PRODUCTS.
@@ -651,17 +659,31 @@ __main__ - INFO - Column EMBEDDINGS successfully added to PRODUCTS.
 __main__ - INFO - All embeddings committed.
 wayflowcore.executors._flowexecutor - INFO - user_step is yielding
 __main__ - INFO - TOOL:get_product_by_description called
+__main__ - INFO - query:New Zealand Cricket t-shirt
 __main__ - INFO - TOOL:get_product_by_description
- {'PROD_ID': 42, 'PROD_NAME': 'Team shirt', 'PROD_DESC': 'New Zealand Cricket Team', 'COSINE_SIMILARITY': 0.7841360065081899}
+Product list found:
+#PROD_ID: 26 - PRODUCT_NAME: Pro Style Batting Tee - PRODUCT_DESCRIPTION: Pro Style Batting Tee
+#PROD_ID: 125 - PRODUCT_NAME: Bucket Hat - PRODUCT_DESCRIPTION: Cricket Bucket Hat
+#PROD_ID: 42 - PRODUCT_NAME: Team shirt - PRODUCT_DESCRIPTION: New Zealand Cricket Team
+#PROD_ID: 25 - PRODUCT_NAME: 5 Point Batting Tee - PRODUCT_DESCRIPTION: 5 Point Batting Tee
+
 __main__ - INFO - TOOL:get_product_by_description called
+__main__ - INFO - query:Helmets
 __main__ - INFO - TOOL:get_product_by_description
- {'PROD_ID': 116, 'PROD_NAME': 'Catchers Helmet', 'PROD_DESC': 'Catchers Helmet', 'COSINE_SIMILARITY': 0.790164319814014}
+Product list found:
+#PROD_ID: 116 - PRODUCT_NAME: Catchers Helmet - PRODUCT_DESCRIPTION: Catchers Helmet
+#PROD_ID: 123 - PRODUCT_NAME: Helmet - PRODUCT_DESCRIPTION: Cricket Helmet
+#PROD_ID: 134 - PRODUCT_NAME: Shin Guards - PRODUCT_DESCRIPTION: Shin Guards
+#PROD_ID: 133 - PRODUCT_NAME: Goal Keeper Gloves - PRODUCT_DESCRIPTION: Goal Keeper Gloves
+
 __main__ - INFO - TOOL:get_item_prices called
+__main__ - INFO - TOOL:prod_id 42
 __main__ - INFO - TOOL:get_item_prices
  44.99
 __main__ - INFO - TOOL:get_item_prices called
+__main__ - INFO - TOOL:prod_id 123
 __main__ - INFO - TOOL:get_item_prices
- 11.99
+ 49.99
 __main__ - INFO - ---
 Assistant >>> Dear customer,
 
@@ -671,19 +693,85 @@ Products
 ------------------------------------------
 Prod_ID: 42
 Prod_Name: Team shirt
-Prod_Desc: New Zealand Cricket t-shirt
+Prod_Desc: New Zealand Cricket Team
 Prod_List_Price: 44.99  
 Quantity: 2
 Tot_Price: 89.98
 
-Prod_ID: 116
-Prod_Name: Catchers Helmet
-Prod_Desc: Helmets
-Prod_List_Price: 11.99 
+Prod_ID: 123
+Prod_Name: Helmet
+Prod_Desc: Cricket Helmet
+Prod_List_Price: 49.99 
 Quantity: 3
-Tot_Price: 35.97
+Tot_Price: 149.97
 ------------------------------------------
-Total_Order: 125.95
+Total_Order: 239.95
+
+Best
+---
+```
+and an example with ollama `gpt-oss:20b` LLM:
+
+
+
+```bash
+(.venv) cdebari@cdebari-mac wayflow_samples % python3.11 quoting_sales_agent_ollama.py 
+wayflowcore.flow - INFO - No StartStep was given as part of the Flow, one will be added automatically.
+__main__ - INFO - Column EMBEDDINGS exists — dropping it...
+__main__ - INFO - Column EMBEDDINGS successfully dropped from PRODUCTS.
+__main__ - INFO - Column EMBEDDINGS does NOT exist — adding it...
+__main__ - INFO - Column EMBEDDINGS successfully added to PRODUCTS.
+__main__ - INFO - All embeddings committed.
+wayflowcore.executors._flowexecutor - INFO - user_step is yielding
+__main__ - INFO - TOOL:get_product_by_description called
+__main__ - INFO - query:New Zealand Cricket t-shirt
+__main__ - INFO - TOOL:get_product_by_description
+Product list found:
+#PROD_ID: 26 - PRODUCT_NAME: Pro Style Batting Tee - PRODUCT_DESCRIPTION: Pro Style Batting Tee
+#PROD_ID: 125 - PRODUCT_NAME: Bucket Hat - PRODUCT_DESCRIPTION: Cricket Bucket Hat
+#PROD_ID: 42 - PRODUCT_NAME: Team shirt - PRODUCT_DESCRIPTION: New Zealand Cricket Team
+#PROD_ID: 25 - PRODUCT_NAME: 5 Point Batting Tee - PRODUCT_DESCRIPTION: 5 Point Batting Tee
+
+__main__ - INFO - TOOL:get_product_by_description called
+__main__ - INFO - query:Helmets
+__main__ - INFO - TOOL:get_product_by_description
+Product list found:
+#PROD_ID: 116 - PRODUCT_NAME: Catchers Helmet - PRODUCT_DESCRIPTION: Catchers Helmet
+#PROD_ID: 123 - PRODUCT_NAME: Helmet - PRODUCT_DESCRIPTION: Cricket Helmet
+#PROD_ID: 134 - PRODUCT_NAME: Shin Guards - PRODUCT_DESCRIPTION: Shin Guards
+#PROD_ID: 133 - PRODUCT_NAME: Goal Keeper Gloves - PRODUCT_DESCRIPTION: Goal Keeper Gloves
+
+__main__ - INFO - TOOL:get_item_prices called
+__main__ - INFO - TOOL:prod_id 42
+__main__ - INFO - TOOL:get_item_prices
+ 44.99
+__main__ - INFO - TOOL:get_item_prices called
+__main__ - INFO - TOOL:prod_id 123
+__main__ - INFO - TOOL:get_item_prices
+ 49.99
+__main__ - INFO - ---
+Assistant >>> Dear customer,
+
+Here is the quote requested for the list of products you asked for:
+
+List of products:
+
+Prod_ID: 42
+Prod_Name: Team shirt
+Prod_Desc: New Zealand Cricket Team
+Prod_List_Price: 44.99
+Quantity: 2
+Tot_Price: 89.98
+
+Prod_ID: 123
+Prod_Name: Helmet
+Prod_Desc: Cricket Helmet
+Prod_List_Price: 49.99
+Quantity: 3
+Tot_Price: 149.97
+
+-------------------------------------
+Total_Order: 239.95
 
 Best
 ---

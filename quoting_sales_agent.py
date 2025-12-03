@@ -68,7 +68,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DB_CFG = {
     "dsn": "localhost:1521/FREEPDB1",
     "user": "SH",
-    "password": "**********", #put [SCHEMA_PASSWORD]
+    "password": "*********", #put [SCHEMA_PASSWORD]
 }
 
 PRODUCTS_TABLE = "PRODUCTS"
@@ -78,7 +78,9 @@ EMBEDDING_SOURCE_COLUMN = "PROD_DESC"
 LLM_CONFIG = LlmGenerationConfig(temperature=0.2)
 
 # Choose your LLM here; easy to swap if needed
-# llm = OllamaModel(model_id="llama3.1", generation_config=None)
+#llm = OllamaModel(model_id="gpt-oss:20b", generation_config=LLM_CONFIG)
+
+
 llm = OpenAIModel(
     model_id="gpt-4o-mini",
     api_key=OPENAI_API_KEY,
@@ -87,7 +89,8 @@ llm = OpenAIModel(
 
 embedding_model = OllamaEmbeddingModel(
     base_url="http://localhost:11434",
-    model_id="nomic-embed-text",
+   #model_id="nomic-embed-text",
+    model_id="mxbai-embed-large",
 )
 
 
@@ -200,8 +203,9 @@ def add_embeddings(table: str, fields: list[str]) -> None:
 
 @tool(description_mode=DescriptionMode.ONLY_DOCSTRING)
 def get_product_by_description(query: str) -> str:
-    """Looks for a product from a description and return the product_id."""
+    """Looks for a list of products similar a description and return a list of product_id and prod_name."""
     logger.info("TOOL:get_product_by_description called")
+    logger.info(f"query:{query}")
 
     q_vector = embed_text_to_vector(query)
     k = 4
@@ -230,14 +234,21 @@ def get_product_by_description(query: str) -> str:
         return "No matching product found."
 
     best = rows[0]
-    logger.info(f"TOOL:get_product_by_description\n {best}")
-    return f"PROD_ID: {best['PROD_ID']} - PRODUCT_NAME: {best['PROD_NAME']}"
+    
+    response = ""
+    for row in rows:
+        response+=f"#PROD_ID: {row['PROD_ID']} - PRODUCT_NAME: {row['PROD_NAME']} - PRODUCT_DESCRIPTION: {row['PROD_DESC']}\n"
+    
+    logger.info(f"TOOL:get_product_by_description\nProduct list found:\n{response}")
+
+    return response
 
 
 @tool(description_mode=DescriptionMode.ONLY_DOCSTRING)
 def get_item_prices(prod_id: str) -> str:
     """Get the list price of a product from its prod_id."""
     logger.info("TOOL:get_item_prices called")
+    logger.info(f"TOOL:prod_id {prod_id}")
 
     sql = f"""
         SELECT /* get_item_prices */
@@ -253,7 +264,7 @@ def get_item_prices(prod_id: str) -> str:
             row = cur.fetchone()
             price = row[0] if row else None
 
-    logger.info(f"TOOL:get_item_prices\n {price}")
+    logger.info(f"TOOL:get_item_prices price:\n {price}")
     return "" if price is None else str(price)
 
 
@@ -271,11 +282,11 @@ sales_instructions = """
 You are a sales agent. Your task is to prepare a quote for a list of products the customer has requested. 
 
 Follow these steps:
-1. Find in the request the list of product items.
+1. In the request extract the list of product items.
 2. For each product you find, extract the requested quantity.
-3. Use the tool get_product_by_description to find the prod_id for each product item.
+3. For each product use the tool get_product_by_description to find the prod_id of the most similar product returned
 4. Use the tool get_item_prices to find the unit price given the prod_id.
-5. For each product, calculate the total price as: unit price × quantity.
+5. For each product, calculate the total price as: unit price x quantity.
 6. Prepare the quote strictly in this format:
 
 List of products:
