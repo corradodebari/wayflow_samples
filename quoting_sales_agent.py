@@ -310,7 +310,7 @@ Tot_Price: 89.98
 Total_Order: 239.93
 """
 
-writing_agent = Agent(
+sales_agent = Agent(
     llm=llm,
     tools=[get_item_prices, get_product_by_description],
     custom_instruction=sales_instructions,
@@ -319,7 +319,7 @@ writing_agent = Agent(
 
 agent_step = AgentExecutionStep(
     name="agent_step",
-    agent=writing_agent,
+    agent=sales_agent,
     caller_input_mode=CallerInputMode.NEVER,
     output_descriptors=[output],
 )
