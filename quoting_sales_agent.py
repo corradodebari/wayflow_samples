@@ -8,7 +8,8 @@
 
 #
 # ollama model:
-# ollama pull nomic-embed-text
+# ollama pull nomic-embed-text 
+# ollama pull gpt-oss:20b
 # 
 # Open AI Apikey
 # export OPENAI_API_KEY=".............."
