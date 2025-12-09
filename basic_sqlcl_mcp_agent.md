@@ -1,4 +1,4 @@
-# A NL2SQL in WayFlow with SQLCL MCP server for Oracle DB 
+# A NL2SQL Agent for Oracle DB in WayFlow with the SQLcl MCP server
 
 <div align="center">
 <img align="center" src="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/images/cover2.png" width="600px">
