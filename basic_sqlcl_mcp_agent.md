@@ -26,7 +26,7 @@ In the next episode of this WayFlow walkthrough with Oracle DB, we will bring ev
 - **Python Script** in the GitHub repo: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/howto_mcp_sqlcl">howto_mcp_sqlcl.py</a>**
 
 
-## Prerequisites to Prepare and Run the Demo
+## 2. Pre-requisites to Prepare and Run the Demo
 
 To prepare and run the demo, ensure you have the following:
 - A Python 3.11 virtual environment with the `oci` library installed
@@ -202,7 +202,7 @@ You need to get the Compartment OCID to complete the set of credentials needed t
         compartment_id="ocid1.compartment.oc1..aaaaaaa.......") 
 ```
 
-## 6. MCP Tool & Agent definition
+## 7. MCP Tool & Agent definition
 
 Here is defined the way to call the SQLcl via Stdio protocol:
 
@@ -239,7 +239,7 @@ assistant = Agent(
 )
 ```
 
-## Execution samples:
+## Execution sample:
 We can run through one of the example messages in USER_QUERY[] to test the SQLcl tool, with:
 ```python
 conversation = assistant.start_conversation()
