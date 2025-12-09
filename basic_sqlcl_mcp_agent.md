@@ -23,7 +23,7 @@ In the next episode of this WayFlow walkthrough with Oracle DB, we will bring ev
 **Takeaways:**
 - **WayFlow 25.4.1:** full documentation: **[here](https://oracle.github.io/wayflow/25.4.1/core/api/agentspec.html)**
 - **SQLcl MCP Server:** **[User's Guide](https://docs.oracle.com/en/database/oracle/sql-developer-command-line/25.2/sqcug/sqlcl-mcp-server.html)**
-- **Python Script** in the GitHub repo: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/howto_mcp_sqlcl">howto_mcp_sqlcl.py</a>**
+- **Python Script** in the GitHub repo: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/howto_mcp_sqlcl.py">howto_mcp_sqlcl.py</a>**
 
 
 ## 2. Pre-requisites to Prepare and Run the Demo
