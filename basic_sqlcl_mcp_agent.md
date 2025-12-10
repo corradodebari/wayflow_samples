@@ -404,7 +404,7 @@ https://docs.oracle.com/error-help/db/ora-00904/
 Assistant >>> TOTAL_SALES
 14041,43
 ```
-As you can see, a wrong query is executed, but finally the agent retrieves the write value. The list of tables is also get to start a reasoning on which table define the user query.
+As you can see, a wrong query is executed, but finally the agent retrieves the right value. The list of tables is also got to start a reasoning on which tables define the user query.
 
 
 ## Closing Remarks
