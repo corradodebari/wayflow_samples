@@ -239,7 +239,7 @@ assistant = Agent(
 )
 ```
 
-## Execution sample:
+## 8. Execution example:
 We can run through one of the example messages in USER_QUERY[] to test the SQLcl tool, with:
 ```python
 conversation = assistant.start_conversation()
