@@ -645,7 +645,7 @@ if __name__ == "__main__":
     run_demo()
 ```
 
-## Execution samples:
+## 11. Execution example:
 This is an example of execution with the provided user message:
 `I want to buy two New Zealand Cricket t-shirt, and 3 Helmets`
 
