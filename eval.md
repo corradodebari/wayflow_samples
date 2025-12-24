@@ -26,7 +26,7 @@ After having generated a jsonl file with the question list, you can start the Te
 The scoring phase I've implemented comparing the tables coming from the queries. I've preferred this approach from analyzing the queries by syntactical/semantic point of views, since quite more complex. This method is quite often used in benchmark evaluation, like Spider [1.0](https://yale-lily.github.io/spider) and [2.0](https://spider2-sql.github.io/) and with static DB schema is reliable. Few parameters I've introduced to tune the matching criteria.
 
 Finally is computed a percentage from the correct translations on the total number of question. 
-**<a href="https://github.com/corradodebari/wayflow_samples/blob/main/howto_mcp_sqlcl.py">howto_mcp_sqlcl.py</a>**
+
 
 ## Test Dataset Generation
 It will be executed by: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/text2sql_pipeline_gen.py">text2sql_pipeline_gen.py</a>**, with the support of the connector developed for the Oracle DBMS **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/utils
