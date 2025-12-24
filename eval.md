@@ -9,6 +9,8 @@ Here a proposal to:
 </div>
 
 
+
+
 ## Overview
 This example leverages the [DataFlow project](https://github.com/OpenDCAI/DataFlow), an Open Source framework (Apache-2.0 license), that is a data preparation and training system that turns noisy sources (PDFs, plain text, low-quality QA) into high-quality data to boost domain LLM performance via targeted training (pre-training, SFT, RL) or RAG with cleaned knowledge bases, validated in healthcare, finance, and law.
 In particular I've used the Text2SQL Pipeline, to translates natural language questions into SQL queries, supplemented with explanations, chain-of-thought reasoning, and contextual schema information.
@@ -24,10 +26,11 @@ After having generated a jsonl file with the question list, you can start the Te
 The scoring phase I've implemented comparing the tables coming from the queries. I've preferred this approach from analyzing the queries by syntactical/semantic point of views, since quite more complex. This method is quite often used in benchmark evaluation, like Spider [1.0](https://yale-lily.github.io/spider) and [2.0](https://spider2-sql.github.io/) and with static DB schema is reliable. Few parameters I've introduced to tune the matching criteria.
 
 Finally is computed a percentage from the correct translations on the total number of question. 
-
+**<a href="https://github.com/corradodebari/wayflow_samples/blob/main/howto_mcp_sqlcl.py">howto_mcp_sqlcl.py</a>**
 
 ## Test Dataset Generation
-It will be executed by: `text2sql_pipeline_gen.py`, with the support of the connector developed for the Oracle DBMS `oracledb_connector.py`, based on MySQL implementation.
+It will be executed by: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/text2sql_pipeline_gen.py">text2sql_pipeline_gen.py</a>**, with the support of the connector developed for the Oracle DBMS **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/utils
+/database_connectors/oracledb_connector.py">oracledb_connector.py</a>**, based on MySQL implementation.
 
 Setting the `user`/schema are you interested to test your agent, for example the SH used in the original agent, and providing the credentials, in addition to llm references for chat/embeddings required:
 ```sql
@@ -58,7 +61,7 @@ The modified `text2sql_pipeline_gen.py` will execute only the first three steps:
 The output file will be the 'cache/dataflow_cache_step_step3.jsonl', that will be modified to add a list of golden fields in future and stored as 'cache/dataflow_cache_step_step3_updated.jsonl'
 
 ## Testing
-It will be executed by: `howto_mcp_sqlcl_test.py`
+It will be executed by: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/howto_mcp_sqlcl_test.py">howto_mcp_sqlcl_test.py</a>**
 The original agent file has been modified to generate SQL only, setting in the prompt:
 
 ```python
@@ -77,7 +80,7 @@ and the related SQL translated will be added in the file:
 
 ## Scoring
 
-It will be executed by: `evaluate_sql.py`
+It will be executed by: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/evaluate_sql.py">evaluate_sql.py</a>**
 
 Currently the scoring is based on the percentage coming from ratio `positive_matching / total question`. In a more sophisticated approach, it could be annotated in reference queries the MUST-TO-BE fields in the translated query, but it requires a manual effort, to make more tolerant the scoring system.
 
