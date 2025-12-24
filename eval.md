@@ -3,8 +3,11 @@ Someone, not having always reliable translations from SQLcl Wayflow agent propos
 Here a proposal to:
 - Generate from an existing schema a collection of Question -> SQL statement
 - Test dataset accuracy
+  
+<div align="center">
+<img align="center" src="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/images/coverTesting.png" width="600px">
+</div>
 
-![vllm setup](images/coverTesting.png)
 
 ## Overview
 This example leverages the [DataFlow project](https://github.com/OpenDCAI/DataFlow), an Open Source framework (Apache-2.0 license), that is a data preparation and training system that turns noisy sources (PDFs, plain text, low-quality QA) into high-quality data to boost domain LLM performance via targeted training (pre-training, SFT, RL) or RAG with cleaned knowledge bases, validated in healthcare, finance, and law.
