@@ -4,3 +4,6 @@
 /.venv2
 sqlcl_test.py
 howto_mcp_sqlcl_.py
+/cache
+.vscode/launch.json
+utils/database_connectors/__pycache__
