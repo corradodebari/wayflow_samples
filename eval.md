@@ -112,6 +112,7 @@ To control how strict the comparison is between reference results (A) and transl
 - **ignore_order**:
 	- **False**: only column permutation is allowed; row order must match.
 	- **True**: both column and row permutations are allowed.
+	
 	If the reference SQL contains an ORDER BY, ignore_order is automatically forced to False.
 
 The output will be in `cache/dataflow_cache_step_step3_q_a_test.jsonl` 
