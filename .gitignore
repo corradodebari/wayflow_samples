@@ -7,3 +7,13 @@ howto_mcp_sqlcl_.py
 /cache
 .vscode/launch.json
 utils/database_connectors/__pycache__
+howto_mcp_sqlcl_test_.py
+howto_smolagent_mcp.py
+mcp_server.py
+permutation_check.py
+quoting_sales_agent_oci.py
+quoting_sales_agent_ollama.py
+quoting_sales_agent_openai.py
+quoting_sales_multi_agent.py
+run.txt
+smolagent-running.txt
