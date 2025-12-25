@@ -23,7 +23,7 @@ This provides an independent and bias-free way to build (Question → SQL) pairs
 
 After generating a .jsonl file containing the question set, the testing phase starts: each question is submitted to the agent (modified to return SQL only) and the generated SQL is collected.
 
-For scoring, I compare the result tables produced by the reference SQL and the predicted SQL, rather than attempting a syntactic/semantic comparison of the queries themselves (which is significantly more complex). This execution-based evaluation is widely used in Text2SQL benchmarks such as Spider [1.0](https://yale-lily.github.io/spider) and [2.0](https://spider2-sql.github.io/). With a static schema, it is generally reliable. I also introduced a few parameters to tune the matching criteria.
+For scoring, I compare the result tables produced by the reference SQL and the predicted SQL, rather than attempting a syntactic/semantic comparison of the queries themselves (which is significantly more complex). This execution-based evaluation is widely used in Text2SQL benchmarks such as **Spider** [1.0](https://yale-lily.github.io/spider) and [2.0](https://spider2-sql.github.io/). With a static schema, it is generally reliable. I also introduced a few parameters to tune the matching criteria.
 
 Finally, accuracy is computed as the percentage of correct translations over the total number of questions.
 
@@ -53,9 +53,9 @@ Setting the `user`/schema are you interested to test your agent, for example the
         }
 ```
 The modified `text2sql_pipeline_gen.py` runs only the first three stages of the pipeline:
-1. SQLGenerator: automatically generates SQL query statements from the database schema, producing the raw SQL candidates used by downstream steps.
-2. SQLExecutionFilter: validates SQL correctness by executing each statement and filtering out queries that fail to run successfully.
-3. Text2SQLQuestionGenerator: generates natural-language questions for each SQL statement, building Text-to-SQL question/answer pairs. It can produce multiple candidate questions per query.
+1. **SQLGenerator**: automatically generates SQL query statements from the database schema, producing the raw SQL candidates used by downstream steps.
+2. **SQLExecutionFilter**: validates SQL correctness by executing each statement and filtering out queries that fail to run successfully.
+3. **Text2SQLQuestionGenerator**: generates natural-language questions for each SQL statement, building Text-to-SQL question/answer pairs. It can produce multiple candidate questions per query.
 
 The script outputs 'cache/dataflow_cache_step_step3.jsonl' will later be extended with a set of gold fields and saved as 'cache/dataflow_cache_step_step3_updated.jsonl'.
 
