@@ -1,36 +1,35 @@
 # Automated NL2SQL testing
-Someone, not having always reliable translations from SQLcl Wayflow agent proposed in the previous post, it has asked me how to compare different prompts or, eventually, more sophisticated approach to Natural Language to SQL translation.
-Here a proposal to:
-- Generate from an existing schema a collection of Question -> SQL statement
-- Test dataset accuracy
+Since SQLcl Wayflow agent translations (as proposed in the previous post) are not always reliable, someone asked me how to compare different prompts —or, more generally, more advanced approaches — to Natural Language–to–SQL translation.
+
+Here’s a proposal to:
+	•	Generate a dataset of (Question → SQL statement) pairs from an existing database schema
+	•	Evaluate dataset accuracy (and compare prompts/models consistently)
   
 <div align="center">
 <img align="center" src="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/images/coverTesting.png" width="600px">
 </div>
 
-
-
-
 ## Overview
-This example leverages the [DataFlow project](https://github.com/OpenDCAI/DataFlow), an Open Source framework (Apache-2.0 license), that is a data preparation and training system that turns noisy sources (PDFs, plain text, low-quality QA) into high-quality data to boost domain LLM performance via targeted training (pre-training, SFT, RL) or RAG with cleaned knowledge bases, validated in healthcare, finance, and law.
-In particular I've used the Text2SQL Pipeline, to translates natural language questions into SQL queries, supplemented with explanations, chain-of-thought reasoning, and contextual schema information.
-Without running all the original phases, it has been used in the Test Dataset Generation to:
+This example leverages the [DataFlow project](https://github.com/OpenDCAI/DataFlow), an open-source framework (Apache-2.0) for data preparation and training. DataFlow turns noisy sources (PDFs, plain text, low-quality Q&A) into high-quality data to improve domain LLM performance—either through targeted training (pre-training, SFT, RL) or via RAG with cleaned and validated knowledge bases. It has been validated across healthcare, finance, and legal domains.
 
-- Inspect DB schema
-- Generate SQL statements
-- Generate reference natural-language questions
-This allow an independent, bias free approach to the Question/SQL generation by the agent you are going to test, that start from consistent SQL generated looking at the actual schema, and from that will be formulated the reference question.
+In particular, I used the **Text2SQL pipeline**, which translates natural-language questions into SQL queries and can enrich outputs with explanations, chain-of-thought reasoning, and schema context.
 
-After having generated a jsonl file with the question list, you can start the Testing phase, in which each question will be submitted to the agent, that has been modified to return the SQL only, and collecting the translated SQL.
+For this work, I did not run the full pipeline end-to-end. Instead, I reused it specifically for test dataset generation, to:
+- inspect the database schema
+- generate SQL statements grounded in the schema
+- generate corresponding reference natural-language questions
 
-The scoring phase I've implemented comparing the tables coming from the queries. I've preferred this approach from analyzing the queries by syntactical/semantic point of views, since quite more complex. This method is quite often used in benchmark evaluation, like Spider [1.0](https://yale-lily.github.io/spider) and [2.0](https://spider2-sql.github.io/) and with static DB schema is reliable. Few parameters I've introduced to tune the matching criteria.
+This provides an independent and bias-free way to build (Question → SQL) pairs. The agent under test does not “author” its own benchmark: questions are derived from schema-consistent SQL generated directly from the actual database, and only then converted into natural language.
 
-Finally is computed a percentage from the correct translations on the total number of question. 
+After generating a .jsonl file containing the question set, the testing phase starts: each question is submitted to the agent (modified to return SQL only) and the generated SQL is collected.
 
+For scoring, I compare the result tables produced by the reference SQL and the predicted SQL, rather than attempting a syntactic/semantic comparison of the queries themselves (which is significantly more complex). This execution-based evaluation is widely used in Text2SQL benchmarks such as **Spider** [1.0](https://yale-lily.github.io/spider) and [2.0](https://spider2-sql.github.io/). With a static schema, it is generally reliable. I also introduced a few parameters to tune the matching criteria.
+
+Finally, accuracy is computed as the percentage of correct translations over the total number of questions.
 
 ## Test Dataset Generation
 It will be executed by: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/text2sql_pipeline_gen.py">text2sql_pipeline_gen.py</a>**, with the support of the connector developed for the Oracle DBMS **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/utils
-/database_connectors/oracledb_connector.py">oracledb_connector.py</a>**, based on MySQL implementation.
+/database_connectors/oracledb_connector.py">oracledb_connector.py</a>**, based on the MySQL implementation.
 
 Setting the `user`/schema are you interested to test your agent, for example the SH used in the original agent, and providing the credentials, in addition to llm references for chat/embeddings required:
 ```sql
@@ -53,12 +52,12 @@ Setting the `user`/schema are you interested to test your agent, for example the
             'nq':10
         }
 ```
-The modified `text2sql_pipeline_gen.py` will execute only the first three steps:
-1. SQLGenerator: is responsible for generating SQL query statements based on the database schema, providing raw SQL data for subsequent data processing flows. Automatically generates SQL query statements based on the database schema
-2. SQLExecutionFilter: verifies the correctness of SQL statements by actually executing them, filtering out SQL statements that cannot be executed normally.
-3. Text2SQLQuestionGenerator: generates corresponding natural language questions based on given SQL statements, constructing Text-to-SQL question-answer pairs.S Supports generating multiple candidate questions.
+The modified `text2sql_pipeline_gen.py` runs only the first three stages of the pipeline:
+1. **SQLGenerator**: automatically generates SQL query statements from the database schema, producing the raw SQL candidates used by downstream steps.
+2. **SQLExecutionFilter**: validates SQL correctness by executing each statement and filtering out queries that fail to run successfully.
+3. **Text2SQLQuestionGenerator**: generates natural-language questions for each SQL statement, building Text-to-SQL question/answer pairs. It can produce multiple candidate questions per query.
 
-The output file will be the 'cache/dataflow_cache_step_step3.jsonl', that will be modified to add a list of golden fields in future and stored as 'cache/dataflow_cache_step_step3_updated.jsonl'
+The script outputs 'cache/dataflow_cache_step_step3.jsonl' will later be extended with a set of gold fields and saved as 'cache/dataflow_cache_step_step3_updated.jsonl'.
 
 ## Testing
 It will be executed by: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/howto_mcp_sqlcl_test.py">howto_mcp_sqlcl_test.py</a>**
@@ -82,30 +81,39 @@ and the related SQL translated will be added in the file:
 
 It will be executed by: **<a href="https://github.com/corradodebari/wayflow_samples/blob/main/evaluate_sql.py">evaluate_sql.py</a>**
 
-Currently the scoring is based on the percentage coming from ratio `positive_matching / total question`. In a more sophisticated approach, it could be annotated in reference queries the MUST-TO-BE fields in the translated query, but it requires a manual effort, to make more tolerant the scoring system.
+At the moment, a match (positive/negative) is determined by comparing query results, not SQL syntax.
+Currently, scoring is computed as a simple accuracy ratio:
 
-The match, positive or negative, is based on SQL query results.
+`accuracy = positive_matches / total_questions`
 
-Since the translated SQL (B) could include more fields that the reference (A), that could be tolerated or not, as well as the result of analytical function, a fast + exact approach to implementation has been:
-	1.	Remove extra columns from B using a column fingerprint (row-order invariant).
-	2.	Now A and B_reduced have same shape.
-	3.	Try to match/permutate columns, but order the search by “most discriminative first” (variance can be part of that).
-This avoids trying all column permutations.
+A more sophisticated approach would be to annotate each reference query with must-have fields (i.e., columns that must appear in the translated SQL). That would make the scoring more tolerant and better aligned with intent, but it also introduces manual labeling effort.
 
-Rows can be permuted, columns can be permuted, and B may have extra columns, with strong pruning. It uses a fingerprint (multiset) + backtracking, and it naturally “permutes columns” but only where needed.
+Because the translated SQL (B) may return additional columns compared to the reference (A)—and because analytical functions may produce equivalent results with different projections—the implementation favors a fast, execution-based matching strategy:
+1.	Prune extra columns from B using a row-order–invariant column fingerprint.
+2.	After pruning, A and B_reduced have the same shape.
+3.	Match columns via permutation, prioritizing “most discriminative” columns first (e.g., by variance), to avoid exploring all possible column permutations.
 
-To control the level of similarity between reference SQLs (A) and translated SQLs (B), it's possible to tune some parameters like:
+This approach supports:
+- row permutation (when order is irrelevant),
+- column permutation (when projections are equivalent up to ordering),
+- extra columns in B (with strong pruning).
 
-- **require_same_columns**: determine if the columns must be equal and the same. If False, to be positive the match, all the columns coming from reference SQL (A) must be in the translated one (B), even with different names.
-    - True: B must have same #columns as A (no pruning/subset selection)
-    - False: B may have extra columns; try to match A inside B
-- **require_same_columns_names**: if True, event the column names must be equal in translated sql returns.
-- **consider_duplicates**: if False, the equal records are considered by one only
-- **float_factor**: it defines a tolerance factor for the float number content. It's quite useful if some column is the result of avg() or other mathematical calculation that for the approximations could introduce a little difference. The results are normalized before to compare the results. It compares floats by int(round(v * float_factor)), e.g. 100 => 2 decimal places
-- **ignore_order**: it does mean:
-    - False: only column permutation (rows fixed) match
-    - True : column permutation + row permutation allowed to determine similarity
-    if ORDER BY in reference SQL, ignore_order is automatically set to False.
+Internally, it uses fingerprints (treated as multisets) plus backtracking, and only performs column permutations where necessary.
+
+### Tunable matching parameters
+
+To control how strict the comparison is between reference results (A) and translated results (B), the following parameters can be adjusted:
+- **require_same_columns**: whether the result sets must have exactly the same columns.
+	- **True**: B must have the same number of columns as A (no pruning/subset selection).
+	- **False**: B may include extra columns; the matcher tries to align A within B (even if column names differ).
+- **require_same_columns_names**: if True, column names must match exactly (in addition to values).
+- **consider_duplicates**: if False, duplicate rows are collapsed (i.e., comparisons treat results as sets rather than multisets).
+- **float_factor**: controls tolerance for floating-point comparisons, useful for aggregates like AVG() that may introduce small numeric differences. Floats are normalized via `int(round(v * float_factor))` (e.g., 100 ≈ 2 decimal places).
+- **ignore_order**:
+	- **False**: only column permutation is allowed; row order must match.
+	- **True**: both column and row permutations are allowed.
+	
+	If the reference SQL contains an ORDER BY, ignore_order is automatically forced to False.
 
 The output will be in `cache/dataflow_cache_step_step3_q_a_test.jsonl` 
 
@@ -149,11 +157,8 @@ The output will be in `cache/dataflow_cache_step_step3_q_a_test.jsonl`
 
     POSITIVE: Why? Even order by in the reference, the ignore_order allow permutation on rows to find the match on all rows.
 
-
-
-
-## Setup
-### Dataflow Setup
+## Setup & Running
+### Dataflow/WayFlow env
 
 ```shell
 python3.11 -m venv .venv2 --copies
