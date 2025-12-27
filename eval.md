@@ -179,7 +179,7 @@ export DF_API_KEY=$OPENAI_API_KEY
 
 ## Conclusion
 With this implementation, I've provided a way to test massively the agent running a NL2SQL generation leveraging SQLcl MCP server, in order to tune the prompt and the orchestration to adapt the agent behavior and accuracy to the schema will be used as a target of the requests.
-Next I'll explore the approach to the prompt optimization in NL2SQL agent described in the paper ["Effectiveness of Prompt Optimization in NL2SQL Systems"](https://arxiv.org/pdf/2505.20591) that shows the improvement coming from an *Iterative Prompt Optimization*, a process you can see in the picture included in the paper: 
+Next I'll explore the approach to the prompt optimization in NL2SQL agent described in the paper ["Effectiveness of Prompt Optimization in NL2SQL Systems"](https://arxiv.org/pdf/2505.20591) that shows the improvement coming from an *Iterative Prompt Optimization*, a process you can see in this picture included into the paper: 
 
 <img src="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/images/IPO.png" width="400" />
 
