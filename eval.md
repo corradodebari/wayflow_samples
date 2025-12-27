@@ -1,9 +1,11 @@
 # Automated NL2SQL testing
-Since SQLcl Wayflow agent translations (as proposed in the previous post) are not always reliable, someone asked me how to compare different prompts —or, more generally, more advanced approaches — to Natural Language–to–SQL translation.
+Since the SQLcl Wayflow agent translations proposed in the previous [post](https://corradodebari.github.io/basic_agent_nl2sql.html) are not always reliable, I was asked how to compare different prompts — or, more broadly, more advanced approaches — to Natural Language–to–SQL translation.
 
 Here’s a proposal to:
-	•	Generate a dataset of (Question → SQL statement) pairs from an existing database schema
-	•	Evaluate dataset accuracy (and compare prompts/models consistently)
+- Generate a dataset of (**Question → SQL**) pairs directly from an existing database schema
+- Evaluate accuracy on that dataset, enabling consistent comparisons across prompts/models
+
+This is a must-have first step for improving NL2SQL on **your own schema** — rather than relying only on general-purpose benchmark datasets.
   
 <div align="center">
 <img align="center" src="https://raw.githubusercontent.com/corradodebari/wayflow_samples/main/images/coverTesting.png" width="600px">
